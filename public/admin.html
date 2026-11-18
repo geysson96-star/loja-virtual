@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel administrativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--pri:#0E4D4A;--acc:#FF6B4A;--ink:#141a22;--muted:#6b7280;--line:#e8eaee;--bg:#f5f6f8;--card:#fff;--ok:#1e9e5a;--warn:#d98a00;--bad:#d64545}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,select,textarea{font:inherit;font-size:14px;color:inherit}
+a{color:inherit}
+.hidden{display:none!important}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 70% 20%,color-mix(in srgb,var(--pri) 20%,#fff),var(--bg))}
+.login form{background:#fff;padding:40px;border-radius:22px;width:100%;max-width:380px;box-shadow:0 30px 60px rgba(0,0,0,.08)}
+.login h1{font-size:22px;margin:16px 0 6px}
+.login p{color:var(--muted);margin-bottom:22px}
+.mark{width:48px;height:48px;border-radius:14px;background:var(--pri);color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px}
+
+/* layout */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside.side{background:#fff;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 10px 22px}
+.brand .mark{width:38px;height:38px;font-size:16px;border-radius:11px}
+.brand b{display:block;font-size:15px;line-height:1.2}
+.brand span{font-size:12px;color:var(--muted)}
+.nav{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;font-weight:500;color:#3d4350;text-align:left;width:100%;position:relative}
+.nav svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7}
+.nav:hover{background:var(--bg)}
+.nav.on{background:color-mix(in srgb,var(--pri) 10%,#fff);color:var(--pri)}
+.nav .pill{margin-left:auto;background:var(--acc);color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:9px}
+.side .grow{flex:1}
+.side small{color:var(--muted);font-size:11.5px;padding:0 12px;line-height:1.5}
+main{padding:28px 32px 60px;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.top h2{font-size:24px;letter-spacing:-.5px}
+.top p{color:var(--muted);font-size:13px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;font-weight:600;font-size:13.5px;transition:.15s;white-space:nowrap}
+.btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+.btn.pri{background:var(--pri);color:#fff}.btn.pri:hover{filter:brightness(1.12)}
+.btn.acc{background:var(--acc);color:#fff}
+.btn.ghost{background:#fff;border:1px solid var(--line)}.btn.ghost:hover{border-color:#c9cdd4}
+.btn.danger{color:var(--bad)}.btn.danger:hover{background:#fdeeee}
+.btn.sm{padding:7px 11px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:default}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.panel h3 span{font-size:12px;color:var(--muted);font-weight:400}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.kpi b{display:block;font-size:24px;letter-spacing:-.5px;margin:6px 0 2px}
+.kpi small{font-size:12px;color:var(--muted)}
+.kpi small.up{color:var(--ok)}.kpi small.down{color:var(--bad)}
+.grid2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px}
+.chart{height:220px;display:flex;align-items:flex-end;gap:6px;padding-top:10px}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.chart .bar{width:100%;max-width:34px;background:color-mix(in srgb,var(--pri) 85%,#fff);border-radius:6px 6px 2px 2px;min-height:2px;position:relative;transition:height .5s}
+.chart .col:last-child .bar{background:var(--acc)}
+.chart .bar:hover::after{content:attr(data-v);position:absolute;bottom:100%;left:50%;transform:translate(-50%,-6px);background:var(--ink);color:#fff;font-size:11px;padding:3px 7px;border-radius:6px;white-space:nowrap}
+.chart .lbl{font-size:10.5px;color:var(--muted)}
+.rank{display:flex;flex-direction:column;gap:12px}
+.rank .r{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center}
+.rank .th{width:40px;height:40px;border-radius:8px;overflow:hidden;background:var(--bg)}
+.rank .nm{font-size:13px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank .meter{height:5px;border-radius:3px;background:var(--bg);margin-top:5px;overflow:hidden}
+.rank .meter i{display:block;height:100%;background:var(--pri)}
+.rank .v{font-weight:600;font-size:13px;text-align:right}
+.rank .v small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.alert-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;gap:10px}
+.alert-row:last-child{border:0}
+
+/* tabelas */
+.toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 12px}
+.search input{border:0;outline:0;padding:10px 0;flex:1;background:none}
+.search svg{width:17px;height:17px;stroke:var(--muted);fill:none;stroke-width:2}
+.chipset{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:7px 12px;border-radius:99px;background:#fff;border:1px solid var(--line);font-size:12.5px;font-weight:500}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+table{width:100%;border-collapse:collapse;background:#fff}
+.tbl{border:1px solid var(--line);border-radius:14px;overflow:auto;background:#fff}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap;background:#fafbfc}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border:0}
+tbody tr:hover{background:#fafbfc}
+tr.click{cursor:pointer}
+.pcell{display:flex;gap:12px;align-items:center;min-width:240px}
+.pcell .th{width:46px;height:46px;border-radius:9px;overflow:hidden;background:var(--bg);flex:none}
+.pcell b{font-weight:500;display:block;line-height:1.3}
+.pcell small{color:var(--muted);font-size:12px}
+.num{text-align:right;white-space:nowrap}
+.st{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.st.novo{background:#fff4e0;color:#b36b00}
+.st.pago{background:#e6f0ff;color:#2459c4}
+.st.separado{background:#f1e9ff;color:#6a3fc2}
+.st.entregue{background:#e7f7ee;color:var(--ok)}
+.st.cancelado{background:#f1f1f3;color:#8a8f99}
+.stock{font-weight:600}
+.stock.low{color:var(--warn)}.stock.zero{color:var(--bad)}
+.switch{position:relative;width:38px;height:22px;border-radius:11px;background:#d5d8de;transition:.2s;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.switch.on{background:var(--ok)}.switch.on::after{left:19px}
+.empty{padding:50px;text-align:center;color:var(--muted)}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,20,30,.45);backdrop-filter:blur(2px);display:grid;place-items:center;padding:20px;z-index:50}
+.modal{background:#fff;border-radius:18px;width:100%;max-width:760px;max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.2)}
+.modal header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+.modal header h4{font-size:17px}
+.modal .body{padding:22px}
+.modal footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form .full{grid-column:1/-1}
+.f label{display:block;font-size:12.5px;font-weight:500;margin-bottom:6px;color:#3d4350}
+.f input,.f select,.f textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;outline:0;background:#fff}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--pri);box-shadow:0 0 0 3px color-mix(in srgb,var(--pri) 15%,transparent)}
+.f .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+.photo{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center}
+.photo .pv{width:150px;height:150px;border-radius:12px;overflow:hidden;background:var(--bg);border:1px dashed #cfd3da}
+.drop{border:1.5px dashed #cfd3da;border-radius:12px;padding:16px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer}
+.drop:hover{border-color:var(--pri);color:var(--pri)}
+.colors-in{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.colors-in input[type=color]{width:38px;height:38px;padding:2px;border-radius:10px;cursor:pointer}
+.checks{display:flex;gap:18px;flex-wrap:wrap}
+.checks label{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
+.margin-box{background:var(--bg);border-radius:10px;padding:10px 14px;font-size:13px;display:flex;gap:18px;flex-wrap:wrap}
+.margin-box b{color:var(--pri)}
+.items-edit .row{display:grid;grid-template-columns:1fr 80px 110px 34px;gap:8px;margin-bottom:8px;align-items:center}
+.ord-items{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0}
+.ord-items div{display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);gap:10px}
+.ord-items div:last-child{border:0;font-weight:700;background:#fafbfc}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;font-size:13.5px}
+.kv span{color:var(--muted)}
+.status-pick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.status-pick button{opacity:.55}.status-pick button.on{opacity:1;box-shadow:0 0 0 2px currentColor}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,100px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:13.5px;z-index:60;transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.toast.on{transform:translate(-50%,0)}
+.toast.err{background:var(--bad)}
+.demo-note{background:#fff8e6;border:1px solid #f3dca4;color:#7a5a00;padding:10px 14px;border-radius:12px;font-size:12.5px;margin-bottom:18px;line-height:1.5}
+
+.mob-top{display:none}
+@media (max-width:1100px){.kpis{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+@media (max-width:820px){
+  .app{grid-template-columns:1fr}
+  aside.side{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:40;transform:translateX(-100%);transition:.3s;box-shadow:20px 0 40px rgba(0,0,0,.1)}
+  aside.side.open{transform:none}
+  .mob-top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+  main{padding:20px 16px 60px}
+  .form{grid-template-columns:1fr}
+  .photo{grid-template-columns:1fr}
+  .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login hidden" id="login">
+  <form id="loginForm">
+    <div class="mark" id="loginMark">A</div>
+    <h1>Painel administrativo</h1>
+    <p id="loginSub">Entre para gerenciar a loja</p>
+    <div class="f"><label>Senha</label><input type="password" id="pw" required autofocus></div>
+    <div id="loginErr" style="color:var(--bad);font-size:13px;margin:10px 0;min-height:18px"></div>
+    <button class="btn pri" style="width:100%;justify-content:center;padding:13px">Entrar</button>
+    <p style="margin:16px 0 0;text-align:center;font-size:12.5px"><a href="index.html">← Voltar para a loja</a></p>
+  </form>
+</div>
+
+<!-- APP -->
+<div class="app hidden" id="app">
+  <aside class="side" id="side">
+    <div class="brand"><div class="mark" id="sideMark"></div><div><b id="sideName"></b><span>Painel da loja</span></div></div>
+    <button class="nav on" data-view="dash"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/></svg>Visão geral</button>
+    <button class="nav" data-view="orders"><svg viewBox="0 0 24 24"><path d="M6 2h12l2 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z"/><path d="M4 6h16M9 11h6M9 15h6"/></svg>Pedidos e vendas<span class="pill hidden" id="newPill"></span></button>
+    <button class="nav" data-view="products"><svg viewBox="0 0 24 24"><path d="M20 7 12 3 4 7v10l8 4 8-4Z"/><path d="m4 7 8 4 8-4M12 11v10"/></svg>Produtos</button>
+    <button class="nav" data-view="campaigns"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 6"/><circle cx="15.5" cy="8.5" r="1.5"/></svg>Campanhas e banners</button>
+    <button class="nav" data-view="content"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/><path d="m15 19 5-5-2-2-5 5v2Z"/></svg>Textos e seções</button>
+    <button class="nav" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>Configurações</button>
+    <div class="grow"></div>
+    <a class="nav" href="index.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M14 3h7v7M10 14 21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>Ver a loja</a>
+    <button class="nav" id="logout"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sair</button>
+    <small id="modeNote"></small>
+  </aside>
+  <div>
+    <div class="mob-top"><button class="btn ghost sm" id="menuBtn">☰ Menu</button><b id="mobTitle"></b><span></span></div>
+    <main id="main"></main>
+  </div>
+</div>
+
+<div id="modalRoot"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileImport" accept=".json" hidden>
+<input type="file" id="fileCsv" accept=".csv,.txt" hidden>
+
+<script src="api.js"></script>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+let D=null, VIEW='dash', MODE='demo';
+const STATUS=['novo','pago','separado','entregue','cancelado'];
+const STL={novo:'Novo',pago:'Pago',separado:'Separado',entregue:'Entregue',cancelado:'Cancelado'};
+const day=t=>{const d=new Date(t); d.setHours(0,0,0,0); return d.getTime()};
+const fdate=t=>new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const valid=o=>o.status!=='cancelado';
+
+function toast(m,err){ const t=$('#toast'); t.textContent=m; t.classList.toggle('err',!!err); t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('on'),2600) }
+async function run(fn,okMsg){ try{ const r=await fn(); if(okMsg) toast(okMsg); return r }catch(e){ if(e.auth){ API.clearToken(); showLogin() } toast(e.message,true); throw e } }
+async function reload(){ D=await run(()=>API.data()); theme(); render() }
+function theme(){ const s=D.settings, r=document.documentElement.style; r.setProperty('--pri',s.primary); r.setProperty('--acc',s.accent);
+  const ini=s.name.split(/\s+/).filter(w=>/\w/.test(w)).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  $('#sideMark').textContent=ini; $('#sideName').textContent=s.name; document.title='Painel — '+s.name;
+  const n=D.orders.filter(o=>o.status==='novo').length; $('#newPill').textContent=n; $('#newPill').classList.toggle('hidden',!n); }
+
+/* ================= NAVEGAÇÃO ================= */
+$$('.nav[data-view]').forEach(b=>b.onclick=()=>{ VIEW=b.dataset.view; $$('.nav[data-view]').forEach(x=>x.classList.toggle('on',x===b)); $('#side').classList.remove('open'); render(); scrollTo(0,0) });
+$('#menuBtn').onclick=()=>$('#side').classList.toggle('open');
+$('#logout').onclick=()=>{ API.clearToken(); showLogin() };
+function render(){ ({dash,orders,products,campaigns,content,settings})[VIEW](); $('#mobTitle').textContent={dash:'Visão geral',orders:'Pedidos',products:'Produtos',campaigns:'Campanhas',content:'Textos e seções',settings:'Configurações'}[VIEW] }
+const demoNote=()=>MODE==='demo'?`<div class="demo-note"><b>Modo demonstração:</b> os dados ficam salvos só neste navegador. Quando o site for publicado no Render, tudo passa a ser salvo no servidor e aparece para os clientes. <button class="btn sm ghost" style="margin-left:6px" id="resetDemo">Restaurar exemplo</button></div>`:'';
+function bindDemo(){ const b=$('#resetDemo'); if(b) b.onclick=async()=>{ D=await API.reset(); theme(); render(); toast('Dados de exemplo restaurados') } }
+
+/* ================= VISÃO GERAL ================= */
+function dash(){
+  const O=D.orders.filter(valid), now=new Date(), today=day(now);
+  const mStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+  const pmStart=new Date(now.getFullYear(),now.getMonth()-1,1).getTime();
+  const sum=l=>l.reduce((s,o)=>s+o.total,0);
+  const profit=l=>l.reduce((s,o)=>s+o.items.reduce((a,i)=>a+(i.price-(i.cost||0))*i.qty,0),0);
+  const tOrders=O.filter(o=>o.date>=today), mOrders=O.filter(o=>o.date>=mStart), pmOrders=O.filter(o=>o.date>=pmStart&&o.date<mStart);
+  const mRev=sum(mOrders), pmRev=sum(pmOrders), diff=pmRev?((mRev-pmRev)/pmRev*100):null;
+  // últimos 14 dias
+  const days=[...Array(14)].map((_,i)=>{const d=new Date(today); d.setDate(d.getDate()-13+i); return d.getTime()});
+  const vals=days.map(d=>sum(O.filter(o=>day(o.date)===d))); const mx=Math.max(1,...vals);
+  // ranking
+  const agg={}; mOrders.forEach(o=>o.items.forEach(i=>{ agg[i.id]=agg[i.id]||{id:i.id,name:i.name,q:0,v:0}; agg[i.id].q+=i.qty; agg[i.id].v+=i.qty*i.price }));
+  const top=Object.values(agg).sort((a,b)=>b.v-a.v).slice(0,5), tmx=Math.max(1,...top.map(t=>t.v));
+  const low=D.products.filter(p=>p.active&&p.stock<=3).sort((a,b)=>a.stock-b.stock);
+  const pend=D.orders.filter(o=>o.status==='novo'||o.status==='pago'||o.status==='separado');
+  $('#main').innerHTML=`${demoNote()}
+  <div class="top"><div><h2>Olá! 👋</h2><p>${now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p></div>
+    <div class="actions"><button class="btn ghost" data-go="products" data-new>+ Produto</button><button class="btn pri" id="qSale">+ Registrar venda</button></div></div>
+  <div class="kpis">
+    <div class="kpi"><span>Vendas hoje</span><b>${brl(sum(tOrders))}</b><small>${tOrders.length} pedido(s)</small></div>
+    <div class="kpi"><span>Faturamento do mês</span><b>${brl(mRev)}</b><small class="${diff==null?'':diff>=0?'up':'down'}">${diff==null?'—':(diff>=0?'▲ ':'▼ ')+Math.abs(diff).toFixed(0)+'% vs mês passado'}</small></div>
+    <div class="kpi"><span>Lucro estimado no mês</span><b>${brl(profit(mOrders))}</b><small>pelo custo cadastrado</small></div>
+    <div class="kpi"><span>Ticket médio</span><b>${brl(mOrders.length?mRev/mOrders.length:0)}</b><small>${mOrders.length} pedidos no mês</small></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Vendas — últimos 14 dias <span>${brl(vals.reduce((a,b)=>a+b,0))}</span></h3>
+      <div class="chart">${days.map((d,i)=>`<div class="col"><div class="bar" style="height:${vals[i]/mx*100}%" data-v="${brl(vals[i])}"></div><span class="lbl">${new Date(d).getDate()}</span></div>`).join('')}</div></div>
+    <div class="panel"><h3>Mais vendidos no mês</h3><div class="rank">${top.length?top.map(t=>{const p=D.products.find(x=>x.id===t.id)||{name:t.name}; return `<div class="r"><div class="th">${prodArt(p)}</div><div style="min-width:0"><div class="nm">${esc(t.name)}</div><div class="meter"><i style="width:${t.v/tmx*100}%"></i></div></div><div class="v">${brl(t.v)}<small>${t.q} un.</small></div></div>`}).join(''):'<p style="color:var(--muted)">Nenhuma venda no mês ainda.</p>'}</div></div>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h3>Pedidos para atender <span>${pend.length}</span></h3>${pend.length?pend.slice(0,6).map(o=>`<div class="alert-row" style="cursor:pointer" data-order="${o.id}"><span><b>#${esc(o.id)}</b> · ${esc(o.customer.name||'Cliente')}</span><span style="display:flex;gap:10px;align-items:center"><b>${brl(o.total)}</b><span class="st ${o.status}">${STL[o.status]}</span></span></div>`).join(''):'<p style="color:var(--muted)">Tudo em dia! 🎉</p>'}</div>
+    <div class="panel"><h3>Estoque baixo <span>${low.length} produto(s)</span></h3>${low.length?low.slice(0,6).map(p=>`<div class="alert-row" style="cursor:pointer" data-edit="${p.id}"><span>${esc(p.name)}</span><span class="stock ${p.stock<=0?'zero':'low'}">${p.stock<=0?'Esgotado':p.stock+' un.'}</span></div>`).join(''):'<p style="color:var(--muted)">Nenhum produto com estoque baixo.</p>'}</div>
+  </div>`;
+  bindDemo();
+  $('#qSale').onclick=()=>saleModal();
+  $$('[data-order]').forEach(r=>r.onclick=()=>orderModal(r.dataset.order));
+  $$('[data-edit]').forEach(r=>r.onclick=()=>productModal(r.dataset.edit));
+  $('[data-new]').onclick=()=>productModal();
+}
+
+/* ================= PEDIDOS ================= */
+let oFilter='todos', oQ='';
+function orders(){
+  const list=D.orders.filter(o=>(oFilter==='todos'||o.status===oFilter)&&(!oQ||(o.id+' '+o.customer.name+' '+o.customer.phone+' '+o.items.map(i=>i.name).join(' ')).toLowerCase().includes(oQ.toLowerCase())));
+  const cnt=s=>D.orders.filter(o=>o.status===s).length;
+  $('#main').innerHTML=`${demoNote()}
+  <div class="top"><div><h2>Pedidos e vendas</h2><p>${D.orders.length} pedidos no total · os pedidos do site chegam aqui como "Novo"</p></div>
+    <div class="actions"><button class="btn ghost" id="expCsv">Exportar planilha</button><button class="btn pri" id="newSale">+ Registrar venda</button></div></div>
+  <div class="toolbar"><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="oq" placeholder="Buscar por cliente, nº ou produto" value="${esc(oQ)}"></div>
+    <div class="chipset">${['todos',...STATUS].map(s=>`<button class="chip ${oFilter===s?'on':''}" data-f="${s}">${s==='todos'?'Todos':STL[s]}${s!=='todos'?` (${cnt(s)})`:''}</button>`).join('')}</div></div>
+  <div class="tbl">${list.length?`<table><thead><tr><th>Nº</th><th>Data</th><th>Cliente</th><th class="hide-m">Itens</th><th class="hide-m">Origem</th><th>Status</th><th class="num">Total</th></tr></thead><tbody>
+    ${list.map(o=>`<tr class="click" data-order="${o.id}"><td><b>#${esc(o.id)}</b></td><td>${fdate(o.date)}</td><td>${esc(o.customer.name||'—')}<br><small style="color:var(--muted)">${esc(o.customer.phone||'')}</small></td>
+    <td class="hide-m" style="max-width:280px">${o.items.map(i=>`${i.qty}× ${esc(i.name)}`).join('<br>')}</td><td class="hide-m">${o.channel==='site'?'Site':'Manual'}</td><td><span class="st ${o.status}">${STL[o.status]}</span></td><td class="num"><b>${brl(o.total)}</b></td></tr>`).join('')}
+  </tbody></table>`:'<div class="empty">Nenhum pedido encontrado.</div>'}</div>`;
+  bindDemo();
+  const q=$('#oq'); q.oninput=()=>{ oQ=q.value; const p=q.selectionStart; orders(); const n=$('#oq'); n.focus(); n.setSelectionRange(p,p) };
+  $$('[data-f]').forEach(c=>c.onclick=()=>{ oFilter=c.dataset.f; orders() });
+  $$('[data-order]').forEach(r=>r.onclick=()=>orderModal(r.dataset.order));
+  $('#newSale').onclick=()=>saleModal();
+  $('#expCsv').onclick=()=>{ const rows=[['Pedido','Data','Cliente','Telefone','Entrega','Endereco','Pagamento','Status','Itens','Total']].concat(D.orders.map(o=>[o.id,new Date(o.date).toLocaleString('pt-BR'),o.customer.name,o.customer.phone,o.customer.delivery,o.customer.address,o.payment,STL[o.status],o.items.map(i=>i.qty+'x '+i.name).join(' | '),String(o.total).replace('.',',')]));
+    copyOrDownload(rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(';')).join('\n'),'pedidos.csv') };
+}
+function copyOrDownload(text,name){
+  try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿'+text],{type:'text/csv'})); a.download=name; document.body.appendChild(a); a.click(); a.remove() }catch(e){}
+  if(navigator.clipboard) navigator.clipboard.writeText(text).then(()=>toast('Planilha baixada (e copiada — cole no Excel/Sheets)'),()=>toast('Planilha gerada'));
+}
+function orderModal(id){
+  const o=D.orders.find(x=>x.id===id); if(!o) return;
+  const wa=(o.customer.phone||'').replace(/\D/g,''); const waNum=wa.length<=11?'55'+wa:wa;
+  modal(`Pedido #${esc(o.id)}`,`
+    <div class="kv"><span>Data</span><b>${new Date(o.date).toLocaleString('pt-BR')}</b><span>Cliente</span><b>${esc(o.customer.name||'—')}</b><span>WhatsApp</span><b>${esc(o.customer.phone||'—')}</b>
+    <span>Recebimento</span><b>${esc(o.customer.delivery||'—')}</b>${o.customer.address?`<span>Endereço</span><b>${esc(o.customer.address)}</b>`:''}<span>Pagamento</span><b>${esc(o.payment||'—')}</b>${o.note?`<span>Observação</span><b>${esc(o.note)}</b>`:''}<span>Origem</span><b>${o.channel==='site'?'Site':'Registrada no painel'}</b></div>
+    <div class="ord-items">${o.items.map(i=>`<div><span>${i.qty}× ${esc(i.name)}</span><span>${brl(i.price*i.qty)}</span></div>`).join('')}<div><span>Total</span><span>${brl(o.total)}</span></div></div>
+    <div class="f"><label>Status do pedido</label><div class="status-pick">${STATUS.map(s=>`<button class="st ${s} ${o.status===s?'on':''}" data-s="${s}">${STL[s]}</button>`).join('')}</div>
+    <div class="hint">Ao cancelar, os itens voltam para o estoque.</div></div>`,
+    `<button class="btn danger" id="delO">Excluir</button><span style="flex:1"></span>${wa?`<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/${waNum}?text=${encodeURIComponent('Olá, '+(o.customer.name||'')+'! Sobre o seu pedido nº '+o.id+'...')}">Chamar no WhatsApp</a>`:''}<button class="btn pri" data-close>Fechar</button>`);
+  $$('[data-s]').forEach(b=>b.onclick=async()=>{ await run(()=>API.setOrderStatus(o.id,b.dataset.s),'Status atualizado'); await reload(); orderModal(id) });
+  $('#delO').onclick=async()=>{ if(!$('#delO').dataset.c){ $('#delO').dataset.c=1; $('#delO').textContent='Confirmar exclusão'; return } await run(()=>API.deleteOrder(o.id),'Pedido excluído'); closeModal(); reload() };
+}
+function saleModal(){
+  const act=D.products.filter(p=>p.active);
+  const opt=act.map(p=>`<option value="${p.id}">${esc(p.name)} — ${brl(p.price)} (${p.stock} em estoque)</option>`).join('');
+  modal('Registrar venda',`
+    <p style="color:var(--muted);margin-bottom:14px">Use para vendas feitas no WhatsApp, Instagram ou pessoalmente. O estoque é baixado automaticamente.</p>
+    <div class="items-edit" id="its"></div><button class="btn ghost sm" id="addIt">+ Adicionar item</button>
+    <div class="form" style="margin-top:18px">
+      <div class="f"><label>Cliente</label><input id="sName" placeholder="Nome"></div>
+      <div class="f"><label>WhatsApp</label><input id="sPhone"></div>
+      <div class="f"><label>Pagamento</label><select id="sPay"><option>PIX</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Dinheiro</option></select></div>
+      <div class="f"><label>Status</label><select id="sSt">${STATUS.filter(s=>s!=='cancelado').map(s=>`<option value="${s}" ${s==='pago'?'selected':''}>${STL[s]}</option>`).join('')}</select></div>
+      <div class="f"><label>Recebimento</label><select id="sDel"><option>Retirada na loja</option><option>Entrega</option></select></div>
+      <div class="f"><label>Observação</label><input id="sNote"></div>
+    </div>
+    <div class="margin-box" style="margin-top:16px">Total: <b id="sTot">R$ 0,00</b></div>`,
+    `<button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="saveSale">Salvar venda</button>`);
+  const add=()=>{ const r=document.createElement('div'); r.className='row f';
+    r.innerHTML=`<select>${opt}</select><input type="number" min="1" value="1" title="Qtd"><input type="number" step="0.01" min="0" title="Preço unitário"><button class="btn danger sm" title="Remover">✕</button>`;
+    const [sel,q,pr,rm]=r.children; const setP=()=>{ pr.value=(act.find(p=>p.id===sel.value)||{}).price||0; tot() };
+    sel.onchange=setP; q.oninput=tot; pr.oninput=tot; rm.onclick=()=>{ r.remove(); tot() };
+    $('#its').appendChild(r); setP(); };
+  const tot=()=>{ $('#sTot').textContent=brl($$('#its .row').reduce((s,r)=>s+(+r.children[1].value||0)*(+r.children[2].value||0),0)) };
+  $('#addIt').onclick=add; if(act.length) add();
+  $('#saveSale').onclick=async()=>{
+    const items=$$('#its .row').map(r=>({id:r.children[0].value,qty:+r.children[1].value,price:+r.children[2].value}));
+    if(!items.length) return toast('Adicione ao menos um item',true);
+    await run(()=>API.createOrder({items,customer:{name:$('#sName').value,phone:$('#sPhone').value,delivery:$('#sDel').value},payment:$('#sPay').value,status:$('#sSt').value,note:$('#sNote').value}),'Venda registrada');
+    closeModal(); reload();
+  };
+}
+
+/* ================= PRODUTOS ================= */
+let pQ='', pCat='todas';
+function products(){
+  const list=D.products.filter(p=>(pCat==='todas'||p.category===pCat)&&(!pQ||p.name.toLowerCase().includes(pQ.toLowerCase())));
+  const stockVal=D.products.reduce((s,p)=>s+Math.max(0,p.stock)*(p.cost||0),0);
+  $('#main').innerHTML=`${demoNote()}
+  <div class="top"><div><h2>Produtos</h2><p>${D.products.length} cadastrados · ${D.products.filter(p=>p.active).length} visíveis na loja · estoque a custo: ${brl(stockVal)}</p></div>
+    <div class="actions"><button class="btn ghost" id="impCsv">Importar planilha</button><button class="btn pri" id="newP">+ Novo produto</button></div></div>
+  <div class="toolbar"><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pq" placeholder="Buscar produto" value="${esc(pQ)}"></div>
+    <div class="chipset">${['todas',...D.categories].map(c=>`<button class="chip ${pCat===c?'on':''}" data-c="${esc(c)}">${c==='todas'?'Todas':esc(c)}</button>`).join('')}</div></div>
+  <div class="tbl">${list.length?`<table><thead><tr><th>Produto</th><th class="num">Preço</th><th class="num hide-m">Custo</th><th class="num hide-m">Margem</th><th class="num">Estoque</th><th>Na loja</th></tr></thead><tbody>
+    ${list.map(p=>{const m=p.price&&p.cost?((p.price-p.cost)/p.price*100):null; return `<tr class="click" data-edit="${p.id}">
+      <td><div class="pcell"><div class="th">${prodArt(p)}</div><div><b>${esc(p.name)}</b><small>${esc(p.category)}${p.novo?' · Novidade':''}${p.oldPrice>p.price?' · Em oferta':''}</small></div></div></td>
+      <td class="num"><b>${brl(p.price)}</b>${p.oldPrice>p.price?`<br><s style="color:var(--muted);font-size:12px">${brl(p.oldPrice)}</s>`:''}</td>
+      <td class="num hide-m">${p.cost?brl(p.cost):'—'}</td><td class="num hide-m">${m==null?'—':m.toFixed(0)+'%'}</td>
+      <td class="num"><span class="stock ${p.stock<=0?'zero':p.stock<=3?'low':''}">${p.stock}</span></td>
+      <td><button class="switch ${p.active?'on':''}" data-tog="${p.id}" aria-label="Mostrar na loja"></button></td></tr>`}).join('')}
+  </tbody></table>`:'<div class="empty">Nenhum produto. Clique em "+ Novo produto" para cadastrar.</div>'}</div>`;
+  bindDemo();
+  const q=$('#pq'); q.oninput=()=>{ pQ=q.value; const p=q.selectionStart; products(); const n=$('#pq'); n.focus(); n.setSelectionRange(p,p) };
+  $$('[data-c]').forEach(c=>c.onclick=()=>{ pCat=c.dataset.c; products() });
+  $$('[data-edit]').forEach(r=>r.onclick=e=>{ if(e.target.closest('[data-tog]')) return; productModal(r.dataset.edit) });
+  $$('[data-tog]').forEach(b=>b.onclick=async()=>{ const p=D.products.find(x=>x.id===b.dataset.tog); await run(()=>API.saveProduct({...p,active:!p.active}),p.active?'Produto oculto da loja':'Produto visível na loja'); reload() });
+  $('#newP').onclick=()=>productModal();
+  $('#impCsv').onclick=()=>csvModal();
+}
+function productModal(id){
+  const p=id?D.products.find(x=>x.id===id):{name:'',category:D.categories[0]||'',price:'',oldPrice:'',cost:'',stock:1,colors:[],image:'',active:true,novo:true,destaque:false,description:''};
+  let img=p.image||'', cols=[...(p.colors||[])];
+  modal(id?'Editar produto':'Novo produto',`
+  <div class="form">
+    <div class="full photo"><div class="pv" id="pv"></div>
+      <div><label class="drop" id="drop">📷 <b>Clique ou arraste a foto aqui</b><br><span style="font-size:12px">JPG ou PNG. A foto é reduzida automaticamente.</span><input type="file" accept="image/*" id="pimg" hidden></label>
+      <button class="btn ghost sm" id="rmImg" style="margin-top:8px">Remover foto</button></div></div>
+    <div class="f full"><label>Nome do produto *</label><input id="fn" value="${esc(p.name)}" placeholder="Ex.: Pote Quadrado 400ml Azul"></div>
+    <div class="f"><label>Categoria</label><select id="fc">${D.categories.map(c=>`<option ${c===p.category?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    <div class="f"><label>Estoque (unidades)</label><input id="fs" type="number" value="${p.stock}"></div>
+    <div class="f"><label>Preço de venda (R$) *</label><input id="fp" type="number" step="0.01" min="0" value="${p.price}"></div>
+    <div class="f"><label>Preço "de" (riscado, opcional)</label><input id="fo" type="number" step="0.01" min="0" value="${p.oldPrice||''}"><div class="hint">Se for maior que o preço, aparece o selo de desconto.</div></div>
+    <div class="f"><label>Custo (R$) — só você vê</label><input id="fk" type="number" step="0.01" min="0" value="${p.cost||''}"></div>
+    <div class="f"><label>Cores (bolinhas no card)</label><div class="colors-in" id="cols"></div></div>
+    <div class="full margin-box" id="mbox"></div>
+    <div class="f full"><label>Descrição</label><textarea id="fd" rows="3" placeholder="Medidas, material, cuidados...">${esc(p.description||'')}</textarea></div>
+    <div class="full checks"><label><input type="checkbox" id="fa" ${p.active?'checked':''}> Mostrar na loja</label><label><input type="checkbox" id="fnv" ${p.novo?'checked':''}> Marcar como novidade</label><label><input type="checkbox" id="fdt" ${p.destaque?'checked':''}> Destaque em "Mais vendidos"</label></div>
+  </div>`,
+  `${id?'<button class="btn danger" id="delP">Excluir</button>':''}<span style="flex:1"></span><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="saveP">${id?'Salvar alterações':'Cadastrar produto'}</button>`);
+  const preview=()=>{ $('#pv').innerHTML=prodArt({...p,image:img,colors:cols,name:$('#fn').value}); $('#rmImg').style.display=img?'':'none' };
+  const drawCols=()=>{ $('#cols').innerHTML=cols.map((c,i)=>`<input type="color" value="${c}" data-ci="${i}" title="Clique para mudar · botão direito remove">`).join('')+(cols.length<4?'<button class="btn ghost sm" id="addCol">+ cor</button>':'');
+    $$('#cols [data-ci]').forEach(el=>{ el.oninput=()=>{ cols[el.dataset.ci]=el.value; preview() }; el.oncontextmenu=e=>{ e.preventDefault(); cols.splice(el.dataset.ci,1); drawCols(); preview() } });
+    const a=$('#addCol'); if(a) a.onclick=()=>{ cols.push(D.settings.primary); drawCols(); preview() } };
+  const margin=()=>{ const pr=+$('#fp').value, c=+$('#fk').value, o=+$('#fo').value;
+    $('#mbox').innerHTML=`Lucro por unidade: <b>${c&&pr?brl(pr-c):'—'}</b> Margem: <b>${c&&pr?((pr-c)/pr*100).toFixed(0)+'%':'—'}</b> Desconto exibido: <b>${o>pr&&pr?Math.round((1-pr/o)*100)+'%':'nenhum'}</b> Parcela 3x: <b>${pr?brl(pr/3):'—'}</b>` };
+  const setFile=async f=>{ if(!f||!/^image\//.test(f.type)) return toast('Escolha uma imagem',true); try{ img=await resizeImage(f); preview() }catch(e){ toast('Não consegui ler a imagem',true) } };
+  $('#pimg').onchange=e=>setFile(e.target.files[0]);
+  const dr=$('#drop'); dr.ondragover=e=>{e.preventDefault(); dr.style.borderColor='var(--pri)'}; dr.ondragleave=()=>dr.style.borderColor=''; dr.ondrop=e=>{e.preventDefault(); dr.style.borderColor=''; setFile(e.dataTransfer.files[0])};
+  $('#rmImg').onclick=()=>{ img=''; preview() };
+  ['#fp','#fk','#fo'].forEach(s=>$(s).oninput=margin); $('#fn').oninput=preview;
+  drawCols(); preview(); margin();
+  $('#saveP').onclick=async()=>{
+    const name=$('#fn').value.trim(), price=+$('#fp').value;
+    if(!name) return toast('Informe o nome do produto',true); if(!(price>0)) return toast('Informe o preço de venda',true);
+    const data={...(id?p:{}),id:id||'',name,category:$('#fc').value,price,oldPrice:+$('#fo').value||0,cost:+$('#fk').value||0,stock:parseInt($('#fs').value)||0,colors:cols,image:img,description:$('#fd').value,active:$('#fa').checked,novo:$('#fnv').checked,destaque:$('#fdt').checked};
+    if(!id) delete data.id;
+    $('#saveP').disabled=true;
+    try{ await run(()=>API.saveProduct(data),id?'Produto atualizado':'Produto cadastrado'); closeModal(); reload() }catch(e){ $('#saveP').disabled=false }
+  };
+  const del=$('#delP'); if(del) del.onclick=async()=>{ if(!del.dataset.c){ del.dataset.c=1; del.textContent='Confirmar exclusão'; return } await run(()=>API.deleteProduct(id),'Produto excluído'); closeModal(); reload() };
+}
+function csvModal(){
+  modal('Importar produtos de planilha',`
+    <p style="color:var(--muted);line-height:1.6;margin-bottom:12px">Cole as linhas da planilha (Excel/Google Sheets) ou envie um arquivo .csv. Colunas na ordem:<br>
+    <b>nome ; categoria ; preço ; preço de ; custo ; estoque</b><br>Pode separar por ponto e vírgula ou tabulação (copiar e colar do Excel funciona). Fotos você adiciona depois em cada produto.</p>
+    <div class="f"><textarea id="csvT" rows="9" placeholder="Pote Quadrado 400ml Azul;Armazenar;34,90;;15;20&#10;Garrafa 500ml Rosa;Para levar;47,90;59,90;20;10"></textarea></div>
+    <button class="btn ghost sm" id="csvF" style="margin-top:8px">Escolher arquivo .csv</button>
+    <div id="csvPrev" style="margin-top:14px"></div>`,
+    `<button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="csvGo" disabled>Importar</button>`);
+  let rows=[];
+  const num=v=>+String(v||'').replace(/[R$\s]/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.')||0;
+  const parse=()=>{ rows=$('#csvT').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>l.split(/\t|;/).map(c=>c.trim().replace(/^"|"$/g,'')))
+      .filter(c=>c[0]&&!/^nome$/i.test(c[0])).map(c=>({name:c[0],category:c[1]||D.categories[0]||'Geral',price:num(c[2]),oldPrice:num(c[3]),cost:num(c[4]),stock:parseInt(c[5])||0}));
+    const bad=rows.filter(r=>!(r.price>0)).length;
+    $('#csvPrev').innerHTML=rows.length?`<div class="margin-box">${rows.length} produto(s) prontos para importar${bad?` · <span style="color:var(--bad)">${bad} sem preço (serão ignorados)</span>`:''}. Categorias novas serão criadas.</div>`:'';
+    $('#csvGo').disabled=!rows.filter(r=>r.price>0).length };
+  $('#csvT').oninput=parse;
+  $('#csvF').onclick=()=>{ const f=$('#fileCsv'); f.value=''; f.onchange=async()=>{ $('#csvT').value=await f.files[0].text(); parse() }; f.click() };
+  $('#csvGo').onclick=async()=>{
+    $('#csvGo').disabled=true; const ok=rows.filter(r=>r.price>0);
+    const cats=[...D.categories]; ok.forEach(r=>{ if(!cats.includes(r.category)) cats.push(r.category) });
+    try{
+      if(cats.length!==D.categories.length) await API.saveSettings({},cats);
+      for(const r of ok) await API.saveProduct({...r,colors:[],image:'',description:'',active:true,novo:true,destaque:false});
+      toast(`${ok.length} produto(s) importados`); closeModal(); reload();
+    }catch(e){ toast(e.message,true); $('#csvGo').disabled=false }
+  };
+}
+
+
+/* ================= CAMPANHAS ================= */
+const ARTS=[['natal','Festivo (cores da loja)'],['oferta','Oferta (fundo escuro)'],['organiza','Claro']];
+function campStatus(h){ const now=Date.now(); if(h.active===false) return ['cancelado','Pausada'];
+  if(h.start&&new Date(h.start+'T00:00').getTime()>now) return ['novo','Agendada'];
+  if(h.end&&new Date(h.end+'T23:59').getTime()<now) return ['cancelado','Encerrada']; return ['entregue','No ar'] }
+function campaigns(){
+  const H=D.settings.heroes||[];
+  $('#main').innerHTML=`${demoNote()}
+  <div class="top"><div><h2>Campanhas e banners</h2><p>Os banners grandes do topo da loja. Agende início e fim de cada campanha.</p></div>
+    <div class="actions"><button class="btn pri" id="newC">+ Nova campanha</button></div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+  ${H.length?H.map((h,i)=>{const [c,l]=campStatus(h); return `<div class="panel" style="padding:0;overflow:hidden;cursor:pointer" data-camp="${i}">
+    <div style="aspect-ratio:16/7;background:#ddd;position:relative">${h.image?`<img src="${h.image}" style="width:100%;height:100%;object-fit:cover">`:`<svg viewBox="0 0 1440 620" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">${heroArtAdmin(h.art)}</svg>`}
+      <span class="st ${c}" style="position:absolute;top:10px;left:10px">${l}</span></div>
+    <div style="padding:14px 16px"><b>${esc(h.title)} ${esc(h.highlight)}</b><div style="color:var(--muted);font-size:12.5px;margin-top:4px">${h.start||h.end?`${h.start?new Date(h.start+'T12:00').toLocaleDateString('pt-BR'):'…'} até ${h.end?new Date(h.end+'T12:00').toLocaleDateString('pt-BR'):'sem fim'}`:'Sempre no ar'} · posição ${i+1}</div></div></div>`}).join(''):'<div class="empty">Nenhuma campanha. Crie a primeira!</div>'}
+  </div>`;
+  bindDemo();
+  $('#newC').onclick=()=>campModal(-1);
+  $$('[data-camp]').forEach(c=>c.onclick=()=>campModal(+c.dataset.camp));
+}
+function heroArtAdmin(k){ const p=D.settings.primary,a=D.settings.accent;
+  return k==='oferta'?`<rect width="1440" height="620" fill="#111418"/><circle cx="1100" cy="300" r="230" fill="${a}"/>`:k==='organiza'?`<rect width="1440" height="620" fill="#eef4f3"/><rect x="900" y="300" width="220" height="170" rx="26" fill="${p}"/>`:`<rect width="1440" height="620" fill="${p}"/><circle cx="1100" cy="250" r="260" fill="${a}" opacity=".7"/>`; }
+function campModal(i){
+  const H=[...(D.settings.heroes||[])]; const h=i>=0?{...H[i]}:{eyebrow:'Nova campanha',title:'',highlight:'',text:'',btn:'Ver produtos',art:'natal',image:'',imageMobile:'',link:'#principais',active:true,start:'',end:'',textColor:'auto'};
+  const links=[['#principais','Novidades'],['#ofertas','Ofertas'],...D.categories.map(c=>['#cat-'+c.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-'),'Categoria: '+c])];
+  modal(i>=0?'Editar campanha':'Nova campanha',`<div class="form">
+    <div class="full"><label class="f" style="display:block"><label>Imagem do banner (computador) — ideal 1920×800</label></label>
+      <div class="pv" id="cpv" style="aspect-ratio:16/7;border-radius:12px;overflow:hidden;background:var(--bg);border:1px dashed #cfd3da"></div>
+      <div class="actions" style="margin-top:8px"><label class="btn ghost sm" style="cursor:pointer">📷 Enviar imagem<input type="file" accept="image/*" id="cimg" hidden></label><button class="btn ghost sm" id="crm">Remover imagem</button></div>
+      <div class="hint" style="font-size:11.5px;color:var(--muted);margin-top:4px">Sem imagem, a loja usa uma arte automática com as cores da marca.</div></div>
+    <div class="f full"><label>Imagem para celular (opcional) — ideal 1080×1350</label><div class="actions"><label class="btn ghost sm" style="cursor:pointer">📱 Enviar imagem do celular<input type="file" accept="image/*" id="cimgm" hidden></label><span id="cmInfo" style="font-size:12.5px;color:var(--muted);align-self:center"></span></div></div>
+    <div class="f"><label>Selo (texto pequeno)</label><input id="ce" value="${esc(h.eyebrow)}"></div>
+    <div class="f"><label>Estilo da arte automática</label><select id="ca">${ARTS.map(([v,l])=>`<option value="${v}" ${h.art===v?'selected':''}>${l}</option>`).join('')}</select></div>
+    <div class="f"><label>Título</label><input id="ct" value="${esc(h.title)}" placeholder="Neste Natal, celebre o"></div>
+    <div class="f"><label>Palavra em destaque</label><input id="ch" value="${esc(h.highlight)}" placeholder="extraordinário"></div>
+    <div class="f full"><label>Texto</label><input id="cx" value="${esc(h.text)}"></div>
+    <div class="f"><label>Texto do botão</label><input id="cb" value="${esc(h.btn)}"></div>
+    <div class="f"><label>O botão leva para</label><select id="cl">${links.map(([v,l])=>`<option value="${esc(v)}" ${h.link===v?'selected':''}>${esc(l)}</option>`).join('')}</select></div>
+    <div class="f"><label>Início (opcional)</label><input type="date" id="cs" value="${h.start||''}"></div>
+    <div class="f"><label>Fim (opcional)</label><input type="date" id="cf" value="${h.end||''}"></div>
+    <div class="f"><label>Cor do texto sobre a imagem</label><select id="cc"><option value="auto" ${h.textColor==='auto'?'selected':''}>Automática</option><option value="light" ${h.textColor==='light'?'selected':''}>Branco</option><option value="dark" ${h.textColor==='dark'?'selected':''}>Escuro</option><option value="none" ${h.textColor==='none'?'selected':''}>Sem texto (a imagem já tem o texto)</option></select></div>
+    <div class="f"><label>Posição</label><select id="cp">${(i>=0?H:[...H,h]).map((_,k)=>`<option value="${k}" ${k===(i>=0?i:H.length)?'selected':''}>${k+1}º banner</option>`).join('')}</select></div>
+    <div class="full checks"><label><input type="checkbox" id="cv" ${h.active!==false?'checked':''}> Campanha ativa</label></div>
+  </div>`,`${i>=0?'<button class="btn danger" id="cdel">Excluir</button>':''}<span style="flex:1"></span><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="csave">Salvar campanha</button>`);
+  let img=h.image||'', imgM=h.imageMobile||'';
+  const pv=()=>{ $('#cpv').innerHTML=img?`<img src="${img}" style="width:100%;height:100%;object-fit:cover">`:`<svg viewBox="0 0 1440 620" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">${heroArtAdmin($('#ca').value)}</svg>`; $('#crm').style.display=img?'':'none'; $('#cmInfo').innerHTML=imgM?'✓ imagem do celular enviada · <a href="#" id="crmM">remover</a>':'usa a mesma do computador'; const r=$('#crmM'); if(r) r.onclick=e=>{e.preventDefault(); imgM=''; pv()} };
+  $('#cimg').onchange=async e=>{ try{ img=await resizeImage(e.target.files[0],1920,.85); pv() }catch(x){ toast('Imagem inválida',true) } };
+  $('#cimgm').onchange=async e=>{ try{ imgM=await resizeImage(e.target.files[0],1080,.85); pv() }catch(x){ toast('Imagem inválida',true) } };
+  $('#crm').onclick=()=>{ img=''; pv() }; $('#ca').onchange=pv; pv();
+  const persist=async list=>{ await run(()=>API.saveSettings({heroes:list}),'Campanhas salvas'); closeModal(); await reload() };
+  $('#csave').onclick=async()=>{
+    const n={eyebrow:$('#ce').value,art:$('#ca').value,title:$('#ct').value,highlight:$('#ch').value,text:$('#cx').value,btn:$('#cb').value,link:$('#cl').value,start:$('#cs').value,end:$('#cf').value,textColor:$('#cc').value,active:$('#cv').checked,image:img,imageMobile:imgM};
+    if(!n.title&&!n.highlight&&!img) return toast('Coloque um título ou uma imagem',true);
+    if(n.start&&n.end&&n.end<n.start) return toast('A data de fim é antes do início',true);
+    const list=H.slice(); if(i>=0) list.splice(i,1); list.splice(Math.min(+$('#cp').value,list.length),0,n);
+    $('#csave').disabled=true; try{ await persist(list) }catch(e){ $('#csave').disabled=false }
+  };
+  const d=$('#cdel'); if(d) d.onclick=async()=>{ if(!d.dataset.c){ d.dataset.c=1; d.textContent='Confirmar exclusão'; return } const list=H.slice(); list.splice(i,1); await persist(list) };
+}
+
+
+/* ================= TEXTOS E SEÇÕES ================= */
+function content(){
+  const C=contentOf(D.settings), V=D.settings.values||[];
+  const txt=(k,l,ph)=>`<div class="f"><label>${l}</label><input data-ck="${k}" value="${esc(C[k])}" ${ph?`placeholder="${esc(ph)}"`:''}></div>`;
+  const area=(k,l)=>`<div class="f full"><label>${l}</label><textarea data-ck="${k}" rows="2">${esc(C[k])}</textarea></div>`;
+  const tog=(k,l)=>`<label class="checks" style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" data-ck="${k}" ${C[k]?'checked':''}> ${l}</label>`;
+  const imgBox=(k,l,hint)=>`<div class="f full"><label>${l}</label><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <div data-pv="${k}" style="height:64px;min-width:64px;max-width:240px;border-radius:10px;background:var(--bg);border:1px dashed #cfd3da;display:grid;place-items:center;overflow:hidden;padding:4px"></div>
+      <label class="btn ghost sm" style="cursor:pointer">📷 Enviar<input type="file" accept="image/*" data-img="${k}" hidden></label><button class="btn ghost sm" data-rmimg="${k}">Remover</button></div>${hint?`<div class="hint">${hint}</div>`:''}</div>`;
+  const sec=(title,on,body)=>`<div class="panel" style="margin-bottom:16px"><h3>${title} ${on?`<span>${on}</span>`:''}</h3><div class="form">${body}</div></div>`;
+  $('#main').innerHTML=`${demoNote()}
+  <div class="top"><div><h2>Textos e seções</h2><p>Tudo o que aparece no site. Desmarque para esconder uma seção.</p></div>
+    <div class="actions"><a class="btn ghost" href="index.html" target="_blank" rel="noopener">Ver a loja</a><button class="btn pri" id="saveCt">Salvar alterações</button></div></div>
+  ${sec('Logo e ícone','',imgBox('logo','Logo da loja','PNG com fundo transparente fica melhor. Sem logo, aparece a inicial do nome.')+txt('logoHeight','Altura do logo (px)')+imgBox('favicon','Ícone da aba do navegador (favicon)','Imagem quadrada, ex.: 512×512.'))}
+  ${sec('Vitrine principal',tog('mainShow','Mostrar'),txt('mainKicker','Texto pequeno (acima)')+txt('mainTitle','Título')+txt('tabNovidades','Aba 1 (novidades)')+txt('tabMais','Aba 2 (mais vendidos)')+txt('tabOfertas','Aba 3 (ofertas)')+`<div class="f full">${tog('catSectionsShow','Mostrar uma vitrine para cada categoria')}</div>`)}
+  ${sec('Banner do meio da página',tog('bannerShow','Mostrar'),imgBox('bannerImage','Imagem de fundo (opcional) — ideal 1600×560','Sem imagem, usa uma arte com as cores da loja.')+txt('bannerKicker','Texto pequeno')+txt('bannerTitle','Título')+area('bannerText','Texto')+txt('bannerBtn','Texto do botão')+txt('bannerLink','Link do botão','#ofertas, #principais ou um endereço https://'))}
+  ${sec('Seção "Nosso jeito" (valores)',tog('valuesShow','Mostrar'),txt('valuesKicker','Texto pequeno')+txt('valuesTitle','Título')+area('valuesText','Texto')+
+     V.concat(V.length<3?[...Array(3-V.length)].map(()=>({t:'',d:''})):[]).slice(0,3).map((v,i)=>`<div class="f"><label>Card ${i+1} — título</label><input data-val="${i}" data-vk="t" value="${esc(v.t)}"></div><div class="f"><label>Card ${i+1} — texto</label><input data-val="${i}" data-vk="d" value="${esc(v.d)}"></div>`).join(''))}
+  ${sec('Faixa de benefícios',tog('perksShow','Mostrar'),(C.perks||[]).slice(0,4).map((p,i)=>`<div class="f"><label>Benefício ${i+1} — título</label><input data-perk="${i}" data-pk="t" value="${esc(p.t)}"></div><div class="f"><label>Benefício ${i+1} — texto</label><input data-perk="${i}" data-pk="d" value="${esc(p.d)}"></div>`).join(''))}
+  ${sec('Produtos e checkout','',txt('addBtn','Botão de adicionar')+txt('newBadge','Selo de novidade')+txt('soldOut','Aviso de esgotado')+txt('installments','Parcelas sem juros (1 = não mostrar)')+txt('installmentsMin','Valor mínimo para parcelar (R$)')+txt('paymentOptions','Formas de pagamento no checkout (separe por vírgula)')+
+     `<div class="f full" style="display:flex;gap:20px;flex-wrap:wrap">${tog('deliveryShow','Oferecer entrega')}${tog('pickupShow','Oferecer retirada na loja')}</div>`+txt('checkoutNote','Aviso abaixo do botão de finalizar')+area('orderDoneText','Mensagem depois que o pedido é enviado'))}
+  ${sec('Newsletter',tog('newsShow','Mostrar'),txt('newsTitle','Título')+txt('newsText','Texto')+txt('newsOk','Mensagem de confirmação'))}
+  <div class="panel" style="margin-bottom:16px"><h3>Páginas de ajuda (rodapé) <button class="btn ghost sm" id="addPg">+ Página</button></h3><div id="pgs"></div></div>
+  ${sec('Rodapé e avisos','',txt('catsTitle','Título da coluna de categorias')+txt('helpTitle','Título da coluna de ajuda')+txt('contactTitle','Título da coluna de contato')+txt('payments','Selos de pagamento (separe por vírgula)')+area('legal','Texto legal (CNPJ, razão social...). Vazio = texto padrão')+`<div class="f full">${tog('cookieShow','Mostrar aviso de cookies')}</div>`+area('cookieText','Texto do aviso de cookies'))}`;
+  bindDemo();
+  const imgs={logo:C.logo,favicon:C.favicon,bannerImage:C.bannerImage};
+  const pv=k=>{ const b=$(`[data-pv="${k}"]`); b.innerHTML=imgs[k]?`<img src="${imgs[k]}" style="max-height:56px;max-width:230px;object-fit:contain">`:'<span style="color:var(--muted);font-size:11px">sem imagem</span>'; $(`[data-rmimg="${k}"]`).style.display=imgs[k]?'':'none' };
+  Object.keys(imgs).forEach(pv);
+  $$('[data-img]').forEach(inp=>inp.onchange=async()=>{ const k=inp.dataset.img; try{ imgs[k]=await resizeImage(inp.files[0],k==='bannerImage'?1600:k==='favicon'?256:600,.9); pv(k) }catch(e){ toast('Imagem inválida',true) } });
+  $$('[data-rmimg]').forEach(b=>b.onclick=()=>{ imgs[b.dataset.rmimg]=''; pv(b.dataset.rmimg) });
+  let pages=(C.pages||[]).map(p=>({...p}));
+  const drawPg=()=>{ $('#pgs').innerHTML=pages.length?pages.map((p,i)=>`<div class="form" style="padding:12px 0;border-bottom:1px solid var(--line)"><div class="f full" style="display:flex;gap:8px;align-items:end"><div style="flex:1"><label>Título</label><input data-pg="${i}" data-pgk="t" value="${esc(p.t)}"></div><button class="btn danger sm" data-rmpg="${i}">Excluir</button></div><div class="f full"><label>Conteúdo</label><textarea rows="4" data-pg="${i}" data-pgk="b">${esc(p.b)}</textarea></div></div>`).join(''):'<p style="color:var(--muted)">Nenhuma página.</p>';
+    $$('[data-pg]').forEach(el=>el.oninput=()=>{ pages[el.dataset.pg][el.dataset.pgk]=el.value });
+    $$('[data-rmpg]').forEach(b=>b.onclick=()=>{ pages.splice(+b.dataset.rmpg,1); drawPg() }) };
+  drawPg(); $('#addPg').onclick=()=>{ pages.push({t:'Nova página',b:''}); drawPg() };
+  $('#saveCt').onclick=async()=>{
+    const c={...C,...imgs};
+    $$('[data-ck]').forEach(el=>{ const k=el.dataset.ck; c[k]=el.type==='checkbox'?el.checked:(['logoHeight','installments','installmentsMin'].includes(k)?+el.value||0:el.value) });
+    c.perks=[0,1,2,3].map(i=>({t:($(`[data-perk="${i}"][data-pk="t"]`)||{}).value||'',d:($(`[data-perk="${i}"][data-pk="d"]`)||{}).value||''})).filter(p=>p.t);
+    c.pages=pages.filter(p=>p.t.trim());
+    const values=[0,1,2].map(i=>({t:$(`[data-val="${i}"][data-vk="t"]`).value,d:$(`[data-val="${i}"][data-vk="d"]`).value})).filter(v=>v.t);
+    $('#saveCt').disabled=true;
+    try{ await run(()=>API.saveSettings({content:c,values}),'Site atualizado'); await reload() }finally{ const b=$('#saveCt'); if(b) b.disabled=false }
+  };
+}
+
+/* ================= CONFIGURAÇÕES ================= */
+function settings(){
+  const s=D.settings;
+  $('#main').innerHTML=`${demoNote()}
+  <div class="top"><div><h2>Configurações da loja</h2><p>Nome, contato, cores e textos que aparecem no site</p></div><div class="actions"><button class="btn pri" id="saveS">Salvar alterações</button></div></div>
+  <div class="grid2" style="grid-template-columns:1fr 1fr">
+    <div class="panel"><h3>Identidade</h3><div class="form">
+      <div class="f"><label>Nome da loja</label><input id="sN" value="${esc(s.name)}"></div>
+      <div class="f"><label>Frase abaixo do nome</label><input id="sT" value="${esc(s.tagline)}"></div>
+      <div class="f"><label>Cor principal</label><input type="color" id="sP" value="${s.primary}" style="height:42px;padding:3px"></div>
+      <div class="f"><label>Cor de destaque</label><input type="color" id="sA" value="${s.accent}" style="height:42px;padding:3px"></div>
+    </div></div>
+    <div class="panel"><h3>Contato</h3><div class="form">
+      <div class="f"><label>WhatsApp (com DDD)</label><input id="sW" value="${esc(s.whatsapp)}" placeholder="5579999999999"><div class="hint">Os pedidos do site são enviados para este número.</div></div>
+      <div class="f"><label>Instagram</label><input id="sI" value="${esc(s.instagram||'')}" placeholder="@sualoja"></div>
+      <div class="f full"><label>Endereço</label><input id="sE" value="${esc(s.address)}"></div>
+      <div class="f"><label>Horário</label><input id="sH" value="${esc(s.hours)}"></div>
+      <div class="f"><label>Entrega grátis acima de (R$)</label><input id="sF" type="number" value="${s.freeShip||0}"><div class="hint">0 = não mostrar</div></div>
+    </div></div>
+  </div>
+  <div class="grid2" style="grid-template-columns:1fr 1fr">
+    <div class="panel"><h3>Categorias <span>uma por linha</span></h3><div class="f"><textarea id="sC" rows="7">${esc(D.categories.join('\n'))}</textarea></div></div>
+    <div class="panel"><h3>Barra de avisos do topo <span>uma por linha</span></h3><div class="f"><textarea id="sB" rows="7">${esc((s.topbar||[]).join('\n'))}</textarea></div></div>
+  </div>
+  <div class="panel"><h3>Backup dos dados</h3><p style="color:var(--muted);margin-bottom:12px">Baixe uma cópia de tudo (produtos, pedidos, configurações) de vez em quando.</p>
+    <div class="actions"><button class="btn ghost" id="bk">Baixar backup</button><button class="btn ghost" id="rs">Restaurar backup</button></div></div>`;
+  bindDemo();
+  $('#saveS').onclick=async()=>{
+    const lines=v=>v.split('\n').map(x=>x.trim()).filter(Boolean);
+    const ns={name:$('#sN').value.trim()||'Minha Loja',tagline:$('#sT').value,primary:$('#sP').value,accent:$('#sA').value,whatsapp:$('#sW').value.replace(/\D/g,''),instagram:$('#sI').value,address:$('#sE').value,hours:$('#sH').value,freeShip:+$('#sF').value||0,topbar:lines($('#sB').value)};
+    const cats=lines($('#sC').value); if(!cats.length) return toast('Deixe ao menos uma categoria',true);
+    await run(()=>API.saveSettings(ns,cats),'Configurações salvas'); reload();
+  };
+  $('#bk').onclick=()=>{ const t=JSON.stringify(D); try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([t],{type:'application/json'})); a.download='backup-loja-'+new Date().toISOString().slice(0,10)+'.json'; document.body.appendChild(a); a.click(); a.remove(); toast('Backup gerado') }catch(e){ toast('Não foi possível baixar aqui',true) } };
+  $('#rs').onclick=()=>{ const f=$('#fileImport'); f.value=''; f.onchange=async()=>{ try{ const d=JSON.parse(await f.files[0].text()); await run(()=>API.importAll(d),'Backup restaurado'); reload() }catch(e){ toast('Arquivo inválido',true) } }; f.click() };
+}
+
+/* ================= MODAL ================= */
+function modal(title,body,foot){
+  $('#modalRoot').innerHTML=`<div class="modal-bg" id="mbg"><div class="modal" role="dialog" aria-modal="true"><header><h4>${title}</h4><button class="btn ghost sm" data-close>✕</button></header><div class="body">${body}</div><footer>${foot}</footer></div></div>`;
+  $('#mbg').onclick=e=>{ if(e.target.id==='mbg'||e.target.closest('[data-close]')) closeModal() };
+}
+function closeModal(){ $('#modalRoot').innerHTML='' }
+addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal() });
+document.addEventListener('click',e=>{ const g=e.target.closest('[data-go]'); if(g&&!g.hasAttribute('data-new')){ $(`.nav[data-view="${g.dataset.go}"]`).click() } });
+
+/* ================= INÍCIO ================= */
+function showLogin(){ $('#app').classList.add('hidden'); $('#login').classList.remove('hidden'); $('#pw').value=''; }
+$('#loginForm').onsubmit=async e=>{ e.preventDefault(); $('#loginErr').textContent='';
+  try{ API.setToken(await API.login($('#pw').value)); await start() }catch(err){ $('#loginErr').textContent=err.message } };
+async function start(){ D=await API.data(); $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); theme(); render() }
+(async()=>{
+  MODE=await API.mode();
+  $('#modeNote').textContent=MODE==='demo'?'Modo demonstração (dados neste navegador)':'Conectado ao servidor';
+  if(MODE==='demo') $('#loginSub').innerHTML='Modo demonstração — senha: <b>admin</b>';
+  if(API.hasToken()){ try{ await start(); return }catch(e){ API.clearToken() } }
+  showLogin();
+})();
+</script>
+</body>
+</html>

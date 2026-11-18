@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: loja-virtual
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: dados-loja
+      mountPath: /var/data
+      sizeGB: 1
