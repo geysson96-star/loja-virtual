@@ -275,7 +275,7 @@ function render(){
   show('main',C.mainShow); show('banner',C.bannerShow); show('values',C.valuesShow); show('perks',C.perksShow); show('news',C.newsShow);
   T('#tMainK',C.mainKicker); T('#tMainT',C.mainTitle); T('#tTab1',C.tabNovidades); T('#tTab2',C.tabMais); T('#tTab3',C.tabOfertas);
   T('#tBanK',C.bannerKicker); T('#tBanT',C.bannerTitle); T('#tBanP',C.bannerText); T('#tBanB',(C.bannerBtn||'Ver mais')+' →'); $('#tBanB').href=C.bannerLink||'#principais';
-  if(C.bannerImage) $('#bannerArt').outerHTML=`<img class="art" id="bannerArt" src="${C.bannerImage}" alt="" style="width:100%;height:100%;object-fit:cover">`;
+  if(C.bannerImage) $('#bannerArt').outerHTML=`<div class="art" id="bannerArt"><img src="${C.bannerImage}" alt="" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.6),rgba(0,0,0,.15) 70%)"></div></div>`;
   T('#tValK',C.valuesKicker); T('#tValT',C.valuesTitle); T('#tValP',C.valuesText);
   T('#tNewsT',C.newsTitle); T('#tNewsP',C.newsText); T('#tCatsH',C.catsTitle); T('#tHelpH',C.helpTitle); T('#tContH',C.contactTitle);
   T('#tCookie',C.cookieText); if(step==='cart') $('#footNote').textContent=C.checkoutNote; let ck=null; try{ck=localStorage.getItem('loja_ck')}catch(e){} $('#cookie').classList.toggle('off',!C.cookieShow||!!ck);

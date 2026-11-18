@@ -35,7 +35,15 @@ const EMPTY = {
 };
 let db;
 try { db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
-catch (e) { db = JSON.parse(JSON.stringify(EMPTY)); }
+catch (e) {
+  // primeira vez (ou disco apagado): começa com o catálogo inicial do seed.json
+  db = JSON.parse(JSON.stringify(EMPTY));
+  try {
+    const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'seed.json'), 'utf8'));
+    db = { ...db, ...seed, settings: { ...db.settings, ...(seed.settings || {}) } };
+    console.log('Catálogo inicial carregado do seed.json:', db.products.length, 'produtos');
+  } catch (e2) {}
+}
 let saving = Promise.resolve();
 function persist() {
   const snapshot = JSON.stringify(db);
@@ -62,6 +70,7 @@ function safeEqual(a, b) {
   return crypto.timingSafeEqual(ha, hb);
 }
 
+const imgOk = v => typeof v === 'string' && (v === '' || v.startsWith('data:image/') || /^\/img\/[\w\-\/.]+$/.test(v));
 /* ---------- regras de pedido ---------- */
 const str = (v, n) => String(v == null ? '' : v).slice(0, n);
 function makeOrder(body, manual) {
@@ -104,13 +113,12 @@ function cleanProduct(b, old) {
     price: Math.max(0, +b.price || 0), oldPrice: Math.max(0, +b.oldPrice || 0), cost: Math.max(0, +b.cost || 0),
     stock: parseInt(b.stock) || 0,
     colors: (Array.isArray(b.colors) ? b.colors : []).filter(c => /^#[0-9a-f]{3,8}$/i.test(c)).slice(0, 4),
-    image: typeof b.image === 'string' && (b.image === '' || b.image.startsWith('data:image/')) ? b.image : (old ? old.image : ''),
+    image: imgOk(b.image) ? b.image : (old ? old.image : ''),
     art: str(b.art || (old && old.art) || '', 20),
     description: str(b.description, 2000), active: b.active !== false, novo: !!b.novo, destaque: !!b.destaque,
     created: old ? old.created : Date.now()
   };
 }
-const imgOk = v => typeof v === 'string' && (v === '' || v.startsWith('data:image/'));
 
 /* ---------- app ---------- */
 const app = express();
